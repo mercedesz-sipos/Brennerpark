@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Questify TALES - Brenner-park (Végleges verzió)</title>
+    <title>Questify TALES - Brenner-park (Élesített verzió)</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -13,7 +13,8 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=1920');
+            /* --- JAVÍTOTT INTERNETES HÁTTÉRKÉP --- */
+            background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=1920'); /* Egy gyönyörű, valós erdei fotó az internetről */
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -83,19 +84,19 @@
 </div>
 
 <script>
-// --- ATOMBIZTOS, TESZTELT AUDIÓK ---
-const hatterZene = new Audio("https://www.soundhelix.com/examples/mp3/alapzene.mp3"); // Lágy, madárcsicsergős, természetközeli akusztikus zene
+// --- ATOMBIZTOS, ZÖLD UTAS MP3 HANGOK ---
+const hatterZene = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
 hatterZene.loop = true;
-hatterZene.volume = 0.2;
+hatterZene.volume = 0.15;
 
-const penzCsorgas = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"); 
+const penzCsorgas = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"); // Egy másik zene, amiből kicsípjük az indító hangot!
 const hibaHang = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3");
-const gyozelemHang = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"); // Felpörgő, vidám, tapsolós zárózene!
 
-let zeneElinditva = false;
-let zeneNémítva = false;
+let zeneElinditva = false; // Figyeli, hogy a játék életében elindult-e már a zene
+let zeneNémítva = false;   // Figyeli, hogy a felhasználó kézzel némított-e
 
 function zeneKapcsolo() {
+    // Első kattintásnál elindítjuk a zenét
     if (!zeneElinditva) {
         hatterZene.play();
         zeneElinditva = true;
@@ -103,12 +104,13 @@ function zeneKapcsolo() {
         return;
     }
 
+    // Későbbi kattintásoknál ki/be kapcsoljuk
     if (zeneNémítva) {
-        hatterZene.volume = 0.2;
+        hatterZene.volume = 0.15;
         zeneNémítva = false;
         document.getElementById("music-icon").innerText = "🔊";
     } else {
-        hatterZene.volume = 0;
+        hatterZene.volume = 0; // Lehalkítjuk nullára, így nem indul újra magától!
         zeneNémítva = true;
         document.getElementById("music-icon").innerText = "🔇";
     }
@@ -167,6 +169,7 @@ function allomasBetoltes() {
 }
 
 function valaszEllenorzes(optionIndex) {
+    // Első kattintásnál elindítjuk a háttérzenét, ha még sosem ment
     if (!zeneElinditva) { 
         zeneKapcsolo(); 
     }
@@ -182,10 +185,10 @@ function valaszEllenorzes(optionIndex) {
         fbBox.className = "feedback success";
         fbBox.innerHTML = valasztottOpacio.feedback;
         
-        // Siker effekt (SoundHelix-8 pörgős indítása)
-        penzCsorgas.currentTime = 5;
+        // Siker effekt indítása
+        penzCsorgas.currentTime = 5; // Beletekerek a szám közepébe, ahol egyből felcsendül egy pörgős hang!
         penzCsorgas.play();
-        setTimeout(() => { penzCsorgas.pause(); }, 1200);
+        setTimeout(() => { penzCsorgas.pause(); }, 1500); // 1.5 másodperc után kényszerítve leállítja, így tökéletes hangeffekt lesz belőle!
         
         tallerek += 10;
         document.getElementById('points').innerText = tallerek;
@@ -194,10 +197,10 @@ function valaszEllenorzes(optionIndex) {
         fbBox.className = "feedback error";
         fbBox.innerHTML = valasztottOpacio.feedback;
         
-        // Hiba effekt (SoundHelix-16 dallamos hiba)
-        hibaHang.currentTime = 2;
+        // Hiba effekt indítása
+        hibaHang.currentTime = 2; // Beletekerek a drámai részhez
         hibaHang.play();
-        setTimeout(() => { hibaHang.pause(); }, 1000);
+        setTimeout(() => { hibaHang.pause(); }, 1200); // 1.2 másodperc után leállítja
         
         nextBtn.style.display = "none";
     }
@@ -209,22 +212,13 @@ function kovetkezoAllomas() {
 }
 
 function gyozelemKepernyo() {
-    // Háttérzene leállítása, hogy ne zavarja a győzelmi fanfárt
-    hatterZene.pause();
-    
-    // --- GYŐZELMI DIADAL HANG INDÍTÁSA ---
-    gyozelemHang.currentTime = 0;
-    gyozelemHang.volume = 0.4;
-    gyozelemHang.play();
-
     let html = `
         <h2>🏆 KÜLDETÉS SIKERESEN TELJESÍTVE!</h2>
-        <p class="story-text">Hihetetlenek vagytok, kalandorok! A medál vakító, aranyló fénnyel forr össze a kezetekben. A sötét varázslat elszállt, a <strong>Büdi-tó ősi varázsa megmenekült!</strong> Alfonz büszkén szalad hozzátok. Megcsináltátok!</p>
+        <p class="story-text">A medál vakító, aranyló fénnyel forr össze a kezetekben. A sötét varázslat elszállt, a <strong>Büdi-tó ősi varázsa megmenekült!</strong> Alfonz büszkén szalad hozzátok. Megcsináltátok!</p>
         <div class="kupon">
             <h3>🎁 A JUTALOM KUPONOTOK</h3>
             <p><strong>A gyerekek vendégek egy finom csokira!</strong></p>
             <p>A felnőtteknek 10% azonnali kedvezmény jár a kávékból! ☕🍫</p>
-            <p><em>(Mutassátok fel ezt a képernyőt a Nefelejcs utcai fagyizónál!)</em></p>
         </div>
     `;
     document.getElementById('game-content').innerHTML = html;
