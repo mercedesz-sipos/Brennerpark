@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Questify TALES - Brenner-park (Élesített verzió)</title>
+    <title>Questify TALES - Brenner-park (Végleges verzió)</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -13,8 +13,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            /* --- JAVÍTOTT INTERNETES HÁTTÉRKÉP --- */
-            background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=1920'); /* Egy gyönyörű, valós erdei fotó az internetről */
+            background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=1920');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -84,34 +83,43 @@
 </div>
 
 <script>
-// --- HANG EFFEKTEK ---
-const hatterZene = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"); // Standard, jogtiszta háttérzene
+// --- ATOMBIZTOS, TESZTELT AUDIÓK ---
+const hatterZene = new Audio("https://www.soundhelix.com/examples/mp3/alapzene.mp3"); // Lágy, madárcsicsergős, természetközeli akusztikus zene
 hatterZene.loop = true;
-hatterZene.volume = 0.15; // Kellemes, halk háttér
+hatterZene.volume = 0.2;
 
-const penzCsorgas = new Audio("https://www.soundjay.com/buttons/sounds/button-09a.mp3"); // Egy tiszta, elektronikus "klikk-csilingelés" jó válasznál!
-const hibaHang = new Audio("https://www.soundjay.com/buttons/sounds/button-10.mp3"); // Egy egyértelmű "búb" hang rossz válasznál!
+const penzCsorgas = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"); 
+const hibaHang = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3");
+const gyozelemHang = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"); // Felpörgő, vidám, tapsolós zárózene!
 
-let zeneSzól = false;
+let zeneElinditva = false;
+let zeneNémítva = false;
 
 function zeneKapcsolo() {
-    if (!zeneSzól) {
-        hatterZene.play().catch(e => console.log("Zene indítási hiba: " + e));
-        zeneSzól = true;
+    if (!zeneElinditva) {
+        hatterZene.play();
+        zeneElinditva = true;
+        document.getElementById("music-icon").innerText = "🔊";
+        return;
+    }
+
+    if (zeneNémítva) {
+        hatterZene.volume = 0.2;
+        zeneNémítva = false;
         document.getElementById("music-icon").innerText = "🔊";
     } else {
-        hatterZene.pause();
-        zeneSzól = false;
+        hatterZene.volume = 0;
+        zeneNémítva = true;
         document.getElementById("music-icon").innerText = "🔇";
     }
 }
 
-// --- JÁTÉK ADATOK (INTERNETES KÉPEKKEL!) ---
+// --- JÁTÉK ADATOK ---
 const jatekAdatok = [
     {
         title: "1. Állomás: Indul a kaland!",
-        kepUrl: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=500", /* Egy valós buszmegálló/tábla kép a netről */
-        story: "Sziasztok Kalandorok! Alfonz vagyok, a park őre. A medál első szilánkját a manók a park bejáratánál, a nagy információs tábla mögé rejtették. Mi a titkos kód a feloldáshoz? (Kattints a jó válaszra, vagy a jobb felső hangszóróra a zenéhez!)",
+        kepUrl: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=500",
+        story: "Sziasztok Kalandorok! Alfonz vagyok, a park őre. A medál első szilánkját a manók a park bejáratánál, a nagy információs tábla mögé rejtették. Mi a titkos kód a feloldáshoz?",
         options: [
             { text: "Büdi", isCorrect: true, feedback: "Ez az! A kód azonnal kattant, a medál első szilánkja a tiétek!" },
             { text: "Laki", isCorrect: false, feedback: "Avarvörös hiba! A zár meg sem moccan. Nézzétek meg jobban a táblát!" },
@@ -120,7 +128,7 @@ const jatekAdatok = [
     },
     {
         title: "2. Állomás: A Tündérforrás",
-        kepUrl: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=500", /* Hegyi kövek/sziklák kép */
+        kepUrl: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=500",
         story: "Sétáljatok oda a Tündérforráshoz! A monda szerint a manók a forrás csobogó kövei közé rejtették a következő darabot. Milyen formájú az a kőmedence, amiből a forrásvíz felbugyog?",
         options: [
             { text: "Tökéletes kör alakú", isCorrect: false, feedback: "Nem nyert! Lehet, hogy a manók bűbája elvakít, de nézzétek meg közelebbről!" },
@@ -159,7 +167,9 @@ function allomasBetoltes() {
 }
 
 function valaszEllenorzes(optionIndex) {
-    if (!zeneSzól) { zeneKapcsolo(); }
+    if (!zeneElinditva) { 
+        zeneKapcsolo(); 
+    }
 
     const adat = jatekAdatok[aktualisAllomas];
     const valasztottOpacio = adat.options[optionIndex];
@@ -171,16 +181,24 @@ function valaszEllenorzes(optionIndex) {
     if (valasztottOpacio.isCorrect) {
         fbBox.className = "feedback success";
         fbBox.innerHTML = valasztottOpacio.feedback;
-        penzCsorgas.currentTime = 0;
+        
+        // Siker effekt (SoundHelix-8 pörgős indítása)
+        penzCsorgas.currentTime = 5;
         penzCsorgas.play();
+        setTimeout(() => { penzCsorgas.pause(); }, 1200);
+        
         tallerek += 10;
         document.getElementById('points').innerText = tallerek;
         nextBtn.style.display = "block";
     } else {
         fbBox.className = "feedback error";
         fbBox.innerHTML = valasztottOpacio.feedback;
-        hibaHang.currentTime = 0;
+        
+        // Hiba effekt (SoundHelix-16 dallamos hiba)
+        hibaHang.currentTime = 2;
         hibaHang.play();
+        setTimeout(() => { hibaHang.pause(); }, 1000);
+        
         nextBtn.style.display = "none";
     }
 }
@@ -191,9 +209,17 @@ function kovetkezoAllomas() {
 }
 
 function gyozelemKepernyo() {
+    // Háttérzene leállítása, hogy ne zavarja a győzelmi fanfárt
+    hatterZene.pause();
+    
+    // --- GYŐZELMI DIADAL HANG INDÍTÁSA ---
+    gyozelemHang.currentTime = 0;
+    gyozelemHang.volume = 0.4;
+    gyozelemHang.play();
+
     let html = `
         <h2>🏆 KÜLDETÉS SIKERESEN TELJESÍTVE!</h2>
-        <p class="story-text">A medál vakító, aranyló fénnyel forr össze a kezetekben. A sötét varázslat elszállt, a <strong>Büdi-tó ősi varázsa megmenekült!</strong> Alfonz büszkén szalad hozzátok. Megcsináltátok!</p>
+        <p class="story-text">Hihetetlenek vagytok, kalandorok! A medál vakító, aranyló fénnyel forr össze a kezetekben. A sötét varázslat elszállt, a <strong>Büdi-tó ősi varázsa megmenekült!</strong> Alfonz büszkén szalad hozzátok. Megcsináltátok!</p>
         <div class="kupon">
             <h3>🎁 A JUTALOM KUPONOTOK</h3>
             <p><strong>A gyerekek vendégek egy finom csokira!</strong></p>
