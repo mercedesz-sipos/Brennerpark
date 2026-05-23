@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questify Platform - Modern Eco</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* --- ALAP BEÁLLÍTÁSOK ÉS HÁTTÉR --- */
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-image: url('hatter.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            color: #111;
+            overflow-x: hidden;
+        }
+
+        /* --- FELSŐ LEBEGŐ MENÜ --- */
+        .navbar-wrapper {
+            position: fixed;
+            top: 25px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 1000;
+            /* JAVÍTÁS: A láthatatlan burkolat ne fogja fel a kattintást! */
+            pointer-events: none; 
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(15px);
+            padding: 12px 35px;
+            border-radius: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.6);
+            display: flex;
+            gap: 35px;
+            align-items: center;
+            /* JAVÍTÁS: Csak maga a látható menü legyen kattintható */
+            pointer-events: auto; 
+        }
+
+        .nav-link {
+            color: #000;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover {
+            color: #059669; 
+        }
+
+        /* --- KÉPERNYŐK KEZELÉSE --- */
+        .screen {
+            display: none !important; /* Biztosítja, hogy rejtve maradjon */
+            width: 100%;
+            min-height: 100vh;
+        }
+        .screen.active {
+            display: flex !important; /* Biztosítja a megjelenést */
+        }
+
+        /* --- FŐOLDAL ELRENDEZÉS (MAIN HUB) --- */
+        #main-hub {
+            position: relative;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10%;
+            box-sizing: border-box;
+        }
+
+        .center-text-block {
+            position: absolute;
+            top: 18%; 
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            width: 100%;
+            color: #000;
+            pointer-events: none; 
+            z-index: 1;
+        }
+
+        .center-text-block h1 {
+            font-size: 55px;
+            margin: 0 0 10px 0;
+            letter-spacing: 2px;
+            font-weight: 900;
+        }
+
+        .center-text-block p {
+            font-size: 22px;
+            font-weight: 600;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .side-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 35px;
+            margin-top: 160px; 
+            position: relative;
+            z-index: 10; /* JAVÍTÁS: A gombok minden felett legyenek */
+        }
+
+        .img-btn-wrapper {
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s;
+            width: 130px;
+            pointer-events: auto;
+        }
+
+        .img-btn-wrapper img {
+            width: 100%;
+            height: auto;
+            border-radius: 25px;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.4);
+            border: 2px solid rgba(255,255,255,0.4);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .img-btn-wrapper:hover {
+            transform: translateY(-6px);
+        }
+
+        .img-btn-wrapper:hover img {
+            box-shadow: 0 18px 35px rgba(0,0,0,0.5);
+            border-color: #fff;
+        }
+
+        .img-btn-wrapper span {
+            display: block;
+            margin-top: 12px;
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.9);
+            text-transform: uppercase;
+        }
+
+        /* --- ALOLDALAK STÍLUSA --- */
+        .modal-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 140px; 
+            padding-bottom: 40px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.8);
+            width: 90%;
+            max-width: 650px;
+            text-align: center;
+        }
+
+        .card h2 { color: #000; margin-top: 0; font-size: 28px; }
+        .card p { color: #333; font-size: 16px; }
+
+        .sub-list { display: flex; flex-direction: column; gap: 15px; margin-top: 30px; }
+        
+        .sub-btn {
+            background: rgba(0, 0, 0, 0.05);
+            color: #000;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 16px 20px;
+            border-radius: 15px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .sub-btn:hover {
+            background: #059669;
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(5, 150, 105, 0.3);
+        }
+
+        .sub-btn span {
+            font-size: 13px;
+            font-weight: normal;
+            display: block;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+
+        .back-btn {
+            background: transparent;
+            color: #000;
+            border: 2px solid #000;
+            padding: 8px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 25px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover { background: #000; color: #fff; }
+
+        /* --- KISEBB KÉPERNYŐK (LAPTOP/MOBIL) JAVÍTÁSA --- */
+        @media (max-width: 1000px) {
+            #main-hub {
+                flex-direction: column;
+                justify-content: center;
+                gap: 30px;
+                padding-top: 120px;
+            }
+            .center-text-block {
+                position: relative;
+                top: auto; left: auto; transform: none;
+            }
+            .side-buttons {
+                margin-top: 20px;
+                flex-direction: row;
+                gap: 20px;
+                justify-content: center;
+            }
+            .navbar { padding: 12px 15px; gap: 15px; }
+            .nav-link { font-size: 12px; }
+            .center-text-block h1 { font-size: 40px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar-wrapper">
+        <nav class="navbar">
+            <a class="nav-link" onclick="valtKepernyo('about-page')">Rólunk</a>
+            <a class="nav-link" onclick="valtKepernyo('how-it-works-page')">Hogyan Működik</a>
+            <a class="nav-link" onclick="valtKepernyo('faq-page')">GYIK</a>
+            <a class="nav-link" onclick="valtKepernyo('login-page')">Bejelentkezés</a>
+            <a class="nav-link" onclick="valtKepernyo('shop-page')">Kosár <i class="fa-solid fa-cart-shopping"></i></a>
+        </nav>
+    </div>
+
+    <div id="main-hub" class="screen active">
+        
+        <div class="center-text-block">
+            <h1>QUESTIFY</h1>
+            <p>Üdvözlünk az interaktív platformunkon.<br>Válj szereplőjévé vagy részévé a programnak.</p>
+        </div>
+
+        <div class="side-buttons left-side">
+            <div class="img-btn-wrapper" onclick="megnyitModul('go')">
+                <img src="go_btn.png" alt="Go Modul">
+                <span>Go</span>
+            </div>
+            <div class="img-btn-wrapper" onclick="megnyitModul('adventures')">
+                <img src="adventure_btn.png" alt="Adventure Modul">
+                <span>Adventures</span>
+            </div>
+        </div>
+
+        <div class="side-buttons right-side">
+            <div class="img-btn-wrapper" onclick="megnyitModul('edu')">
+                <img src="education_btn.png" alt="Education Modul">
+                <span>Edu</span>
+            </div>
+            <div class="img-btn-wrapper" onclick="megnyitModul('wild')">
+                <img src="nature_btn.png" alt="Nature Modul">
+                <span>Wild</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="modul-screen" class="screen">
+        <div class="modal-container">
+            <div class="card">
+                <button class="back-btn" onclick="valtKepernyo('main-hub')">⬅ VISSZA</button>
+                <h2 id="modul-title"></h2>
+                <p id="modul-desc"></p>
+                <div id="sub-category-list" class="sub-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="active-game-screen" class="screen">
+        <div class="modal-container">
+            <div class="card">
+                <button class="back-btn" onclick="visszaAModulhoz()">⬅ VISSZA A LISTÁHOZ</button>
+                <div id="game-placeholder" style="text-align:center; padding: 20px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="about-page" class="screen">
+        <div class="modal-container">
+            <div class="card">
+                <button class="back-btn" onclick="valtKepernyo('main-hub')">⬅ VISSZA</button>
+                <h2>📝 Rólunk</h2>
+                <p>A Questify csapata a digitális kalandok úttörője.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="how-it-works-page" class="screen">
+        <div class="modal-container">
+            <div class="card">
+                <button class="back-btn" onclick="valtKepernyo('main-hub')">⬅ VISSZA</button>
+                <h2>⚙️ Hogyan Működik</h2>
+                <p>Válassz egy modult a főoldalon, és indulhat a játék!</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="faq-page" class="screen">
+        <div class="modal-container">
+            <div class="card">
+                <button class="back-btn" onclick="valtKepernyo('main-hub')">⬅ VISSZA</button>
+                <h2>❓ GYIK</h2>
+                <p>Gyakran Ismételt Kérdések gyűjteménye.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="login-page" class="screen">
+        <div class="modal-container">
+            <div class="card">
+                <button class="back-btn" onclick="valtKepernyo('main-hub')">⬅ VISSZA</button>
+                <h2>🔐 Bejelentkezés</h2>
+                <p>A bejelentkezési felület hamarosan elérhető lesz.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="shop-page" class="screen">
+        <div class="modal-container">
+            <div class="card">
+                <button class="back-btn" onclick="valtKepernyo('main-hub')">⬅ VISSZA</button>
+                <h2>🛒 Kosár</h2>
+                <p>A kosarad jelenleg üres.</p>
+            </div>
+        </div>
+    </div>
+
+<script>
+const modulAdatok = {
+    edu: {
+        title: "🎓 EDU MODUL",
+        desc: "Bővítsd a tudásod interaktív küldetésekkel!",
+        subs: [
+            { eng: "History", hun: "Múltidéző & Történelem" },
+            { eng: "Bio & Nature", hun: "Természet & Élővilág" },
+            { eng: "Literature", hun: "Irodalmi utazások" },
+            { eng: "Sci-tech", hun: "Tudomány és Technológia" },
+            { eng: "Mixing", hun: "Vegyes kategória" },
+            { eng: "Custom", hun: "Egyedi kvíz" }
+        ]
+    },
+    go: {
+        title: "🚶 GO MODUL",
+        desc: "A város az te játszótered. Indulás!",
+        subs: [
+            { eng: "City Explorer", hun: "Városfelfedező séták" },
+            { eng: "Hidden Gems", hun: "Rejtett kincsek nyomában" },
+            { eng: "Gastro Trails", hun: "Ízutazás & Gasztro túrák" },
+            { eng: "Mixing", hun: "Kombinált utak" },
+            { eng: "Custom", hun: "Saját útvonal" }
+        ]
+    },
+    adventures: {
+        title: "🧭 ADVENTURES",
+        desc: "Legyél te a főszereplő a saját történetedben!",
+        subs: [
+            { eng: "Family", hun: "Családi kalandok (Brenner-park)" },
+            { eng: "Mystery", hun: "Nyomozás & Krimi" },
+            { eng: "TeamBuild", hun: "Csapatépítő kihívások" },
+            { eng: "Adrenalin", hun: "Akciódús küldetések" },
+            { eng: "Custom", hun: "Egyedi történet" }
+        ]
+    },
+    wild: {
+        title: "🌲 WILD MODUL",
+        desc: "Küzdd le a természet akadályait!",
+        subs: [
+            { eng: "EcoTrail", hun: "Öko-túrák & Zöldövezet" },
+            { eng: "Survival", hun: "Túlélési tippek" },
+            { eng: "Peak Hunter", hun: "Csúcshódító kihívások" },
+            { eng: "Mixing", hun: "Vegyes erdei utak" },
+            { eng: "Custom", hun: "Saját túra" }
+        ]
+    }
+};
+
+let aktualisModulKey = '';
+
+function valtKepernyo(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+}
+
+function megnyitModul(modulKey) {
+    aktualisModulKey = modulKey;
+    const adat = modulAdatok[modulKey];
+    document.getElementById('modul-title').innerText = adat.title;
+    document.getElementById('modul-desc').innerText = adat.desc;
+    
+    let html = '';
+    adat.subs.forEach(sub => {
+        html += `<button class="sub-btn" onclick="inditKategoria('${sub.eng}')">
+                    <div><strong>${sub.eng}</strong><br><span>${sub.hun}</span></div>
+                    <i class="fa-solid fa-chevron-right"></i>
+                 </button>`;
+    });
+    document.getElementById('sub-category-list').innerHTML = html;
+    valtKepernyo('modul-screen');
+}
+
+function inditKategoria(kategoria) {
+    valtKepernyo('active-game-screen');
+    let html = `<h3>🚀 ${kategoria} elindítva!</h3>`;
+    if(aktualisModulKey === 'adventures' && kategoria === 'Family') {
+        html += `<p>Itt fog futni a <strong>Brenner-park Védelmezői</strong> küldetés!</p>`;
+    } else {
+        html += `<p>A kategória tartalma hamarosan elérhető lesz.</p>`;
+    }
+    document.getElementById('game-placeholder').innerHTML = html;
+}
+
+function visszaAModulhoz() { megnyitModul(aktualisModulKey); }
+</script>
+
+</body>
+</html>
